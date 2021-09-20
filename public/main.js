@@ -1,14 +1,14 @@
 // @ts-check
 
-import { APIWrapper, API_EVENT_TYPE } from './api.js';
+import { APIWrapper, API_EVENT_TYPE } from "./api.js";
 import {
   addMessage,
   animateGift,
   isPossiblyAnimatingGift,
   isAnimatingGiftUI,
-} from './dom_updates.js';
+} from "./dom_updates.js";
 
-const api = new APIWrapper(null, true, true);
+const api = new APIWrapper(null, null, true);
 // const api = new APIWrapper();
 
 let animatedEvents = [];
@@ -18,7 +18,7 @@ let isStopped = true;
 const rateLimitDelay = (miliseconds) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve('resolved');
+      resolve("resolved");
     }, miliseconds);
   });
 };
@@ -33,13 +33,13 @@ const execute = async () => {
   } else if (otherEvents.length > 0) {
     executeOthers(otherEvents);
   }
-  console.log('animated :', animatedEvents.length);
-  console.log('other    :', otherEvents.length);
+  console.log("animated :", animatedEvents.length);
+  console.log("other    :", otherEvents.length);
   if (animatedEvents.length > 0 || otherEvents.length > 0) {
     await rateLimitDelay(500);
     execute();
   } else {
-    console.log('STOPPED');
+    console.log("STOPPED");
     isStopped = true;
   }
 };
@@ -50,16 +50,18 @@ const executeAG = (array) => {
   array.shift();
 };
 
+const isOutDated = (event) => Date.now() - event.timestamp.getTime() > 20000;
+
 const executeOthers = (array) => {
   let isExecuted = false;
 
   while (!isExecuted) {
     if (array.length > 0) {
       if (array[0].type === API_EVENT_TYPE.MESSAGE) {
-        let isOutDated = false;
-        if (isOutDated) {
+        let isOutDatedEvent = isOutDated(array[0]);
+        if (isOutDatedEvent) {
+          console.log("OUTDATED_DELETED :", array[0]);
           array.shift();
-          console.log('OUTDATED_DELETED :', array[0]);
         } else {
           addMessage(array[0]);
           array.shift();
@@ -79,7 +81,7 @@ const executeOthers = (array) => {
 const duplicateFilterById = (array) => {
   const filtered = array.filter((thing, index, self) => {
     let i = self.findIndex((t) => t.id === thing.id);
-    index !== i && console.log('DELETED_DUPLICATE :', array[index]);
+    index !== i && console.log("DUPLICATE_DELETED :", array[index]);
     return index === i;
   });
   return filtered;
@@ -112,7 +114,7 @@ api.setEventHandler((events) => {
     });
     if (isStopped) {
       isStopped = false;
-      console.log('STARTED');
+      console.log("STARTED");
       execute();
     }
   }
