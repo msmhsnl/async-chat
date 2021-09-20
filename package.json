@@ -1,0 +1,17 @@
+{
+  "name": "async-chat",
+  "version": "0.1.0",
+  "author": {
+    "name": "Semih ŞENEL",
+    "email": "msmhsnl@gmail.com"
+  },
+  "scripts": {
+    "dev": "npm start",
+    "serve": "npm start",
+    "start": "live-server --port=8080 --no-browser public"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "live-server": "^1.2.1"
+  }
+}
